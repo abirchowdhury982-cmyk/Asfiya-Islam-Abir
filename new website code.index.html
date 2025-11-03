@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Asfiya Islam Abir — Personal Dashboard</title>
+  <meta name="description" content="Editable personal dashboard for Asfiya Islam Abir (Comilla University — BBA in Management)." />
+  <style>
+    :root{
+      --bg:linear-gradient(135deg,#6a11cb,#2575fc);
+      --card:#ffffff; 
+      --accent:#6a11cb; 
+      --muted:#444;
+      --maxw:1000px; 
+      --radius:12px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#0b2239;display:flex;justify-content:center;padding:28px}
+    .wrap{width:100%;max-width:var(--maxw)}
+    header{display:flex;align-items:center;gap:16px;color:white;}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:20px;}
+    h1{margin:0;font-size:20px;color:white}
+    p.lead{margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:380px 1fr;gap:18px;margin-top:18px}
+    @media(max-width:920px){.grid{grid-template-columns:1fr}}
+
+    .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+    .nav{display:flex;gap:8px;margin-top:12px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:10px;background:var(--accent);color:white;text-decoration:none;font-weight:600;border:none;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(106,17,203,0.2)}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="text"], input[type="email"], input[type="password"], textarea, select {
+      width:100%;padding:10px;border-radius:8px;border:1px solid #e8eef8;background:#fbfdff;font-size:14px;
+    }
+    textarea{min-height:90px;resize:vertical}
+    .small{font-size:13px;color:var(--muted)}
+    .project{padding:10px;border-radius:8px;border:1px solid #f0f4fb;margin-bottom:10px;background:#fbfdff}
+    .row{display:flex;gap:8px}
+    .row > *{flex:1}
+    .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+    .link{color:var(--accent);text-decoration:none;font-weight:600}
+    .centered{display:flex;align-items:center;justify-content:center;height:70vh}
+    .muted{color:var(--muted)}
+    footer{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:10px}
+    .profile-mini{display:flex;align-items:center;gap:10px}
+    .avatar{width:44px;height:44;border-radius:10px;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:18px}
+    .public-view{padding:18px}
+    .field-label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .danger{background:#ffefef;color:#a00;border:1px solid #f2c6c6}
+    .flex-between{display:flex;justify-content:space-between;align-items:center}
+    .small-muted{font-size:12px;color:#8b94a3}
+    .hint{font-size:12px;color:#8b94a3;margin-top:6px}
+    .top-controls{display:flex;gap:8px;align-items:center}
+    .btn-sm{padding:6px 10px;border-radius:8px;font-weight:600}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">AA</div>
+        <div>
+          <h1>Asfiya Islam Abir — Personal Dashboard</h1>
+          <p class="lead">Comilla University — BBA in Management · Creative Purple Gradient Portfolio</p>
+        </div>
+      </div>
+    </header>
+
+    <div id="app" class="grid">
+      <div id="panel" class="card"></div>
+      <div id="preview" class="card public-view"></div>
+    </div>
+
+    <footer>Built for Asfiya · Local editable dashboard · Public & Private view</footer>
+  </div>
+
+<script>
+const STORAGE_KEY = 'asfiya_profile_v1';
+const DEFAULT_PASSWORD_KEY = 'asfiya_profile_password_v1';
+const defaultProfile = {
+  name: "Asfiya Islam Abir",
+  education: "Comilla University — BBA in Management",
+  email: "abirchowdhury982@gmail.com",
+  linkedin: "https://www.linkedin.com/in/asfiyaislamabir?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+  projects: [
+    {title:"Oraimo Supply Chain Analysis Project", desc:"Supply chain analysis project for MGT412 course."},
+    {title:"Aspire Leadership Program 2025", desc:"Participant in Aspire Leadership Program 2025."}
+  ],
+  achievements: [],
+  awards: [],
+  certificates: [],
+  experiences: [],
+  bio: "Student · Researcher · Aspiring leader focused on strategic & digital management."
+};
+if(!localStorage.getItem(DEFAULT_PASSWORD_KEY)){ localStorage.setItem(DEFAULT_PASSWORD_KEY,'MDbs55#411'); }
+let profile = JSON.parse(localStorage.getItem(STORAGE_KEY)||JSON.stringify(defaultProfile));
+let isLoggedIn = sessionStorage.getItem('asfiya_logged_in')==='1';
+
+const panel = document.getElementById('panel');
+const preview = document.getElementById('preview');
+
+function saveProfile(p){ localStorage.setItem(STORAGE_KEY,JSON.stringify(p)); renderPreview(p); }
+function getPassword(){ return localStorage.getItem(DEFAULT_PASSWORD_KEY) || 'MDbs55#411'; }
+function setPassword(p){ localStorage.setItem(DEFAULT_PASSWORD_KEY,p); }
+
+function renderApp(){
+  panel.innerHTML='';
+  if(!isLoggedIn) renderLogin();
+  else renderDashboard();
+  renderPreview(profile);
+}
+
+function renderLogin(){
+  panel.innerHTML = `<h2>Login to Edit</h2>
+  <p class="small muted">Protected dashboard</p>
+  <label class="field-label">Password</label>
+  <input id="pw" type="password" placeholder="Enter password" />
+  <div class="actions" style="margin-top:12px">
+    <button id="btnLogin" class="btn">Login</button>
+    <button id="btnDemo" class="btn ghost">Demo View</button>
+  </div>`;
+  document.getElementById('btnLogin').onclick = ()=>{
+    if(document.getElementById('pw').value===getPassword()){ sessionStorage.setItem('asfiya_logged_in','1'); isLoggedIn=true; renderApp(); }
+    else alert('Incorrect password');
+  };
+  document.getElementById('btnDemo').onclick = ()=>{ isLoggedIn=false; sessionStorage.removeItem('asfiya_logged_in'); alert('Demo mode: view-only'); renderApp(); };
+}
+
+function renderDashboard(){
+  panel.innerHTML = `<div class="topbar">
+    <div class="profile-mini">
+      <div class="avatar">AA</div>
+      <div>
+        <div style="font-weight:700">${escapeHtml(profile.name)}</div>
+        <div class="small-muted">${escapeHtml(profile.email)}</div>
+      </div>
+    </div>
+    <div class="top-controls">
+      <button id="btnExport" class="btn btn-sm ghost">Export JSON</button>
+      <button id="btnImport" class="btn btn-sm ghost">Import JSON</button>
+      <button id="btnLogout" class="btn btn-sm ghost">Logout</button>
+      <button id="btnDelete" class="btn btn-sm danger">Reset</button>
+    </div>
+  </div>
+  <h3>Edit Profile</h3>
+  <label class="field-label">Full name</label>
+  <input id="inName" type="text" value="${escapeHtml(profile.name)}" />
+  <label class="field-label">Education</label>
+  <input id="inEdu" type="text" value="${escapeHtml(profile.education)}" />
+  <label class="field-label">Email</label>
+  <input id="inEmail" type="email" value="${escapeHtml(profile.email)}" />
+  <label class="field-label">LinkedIn URL</label>
+  <input id="inLinkedIn" type="text" value="${escapeHtml(profile.linkedin)}" />
+  <label class="field-label">Bio</label>
+  <textarea id="inBio">${escapeHtml(profile.bio)}</textarea>
+
+  <h3>Projects</h3>
+  <div id="projectsList"></div>
+  <button id="btnAddProject" class="btn ghost btn-sm">+ Add Project</button>
+
+  <h3>Achievements / Awards / Certificates / Experiences</h3>
+  <button id="btnManageExtras" class="btn ghost btn-sm">Manage</button>
+
+  <h3>Settings</h3>
+  <label class="field-label">Change Password</label>
+  <div class="row">
+    <input id="inPass" type="password" placeholder="New password" />
+    <button id="btnChangePass" class="btn btn-sm">Change</button>
+  </div>
+
+  <div class="actions" style="margin-top:12px">
+    <button id="btnSave" class="btn">Save Changes</button>
+    <button id="btnPreview" class="btn ghost">View Public</button>
+  </div>
+
+  <input id="fileInput" type="file" accept="application/json" style="display:none" />`;
+
+  const projectsList = panel.querySelector('#projectsList');
+  function drawProjects(){
+    projectsList.innerHTML='';
+    profile.projects.forEach((p,i)=>{
+      const el = document.createElement('div'); el.className='project';
+      el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>${escapeHtml(p.title)}</strong>
+        <div>
+          <button class="btn-sm ghost edit">Edit</button>
+          <button class="btn-sm danger del">Delete</button>
+        </div>
+      </div>
+      <div class="small" style="margin-top:6px">${escapeHtml(p.desc)}</div>`;
+      projectsList.appendChild(el);
+      el.querySelector('.edit').onclick=()=>{ const t=prompt('Title',p.title); if(!t) return; const d=prompt('Description',p.desc); profile.projects[i]={title:t,desc:d||''}; drawProjects(); };
+      el.querySelector('.del').onclick=()=>{ if(confirm('Delete this project?')) { profile.projects.splice(i,1); drawProjects(); } };
+    });
+  }
+  drawProjects();
+  panel.querySelector('#btnAddProject').onclick=()=>{
+    const t=prompt('Title','New Project'); if(!t) return;
+    const d=prompt('Description',''); profile.projects.push({title:t,desc:d}); drawProjects();
+  };
+
+  // Extras (Achievements/Awards/Certificates/Experiences)
+  panel.querySelector('#btnManageExtras').onclick=()=>{
+    const type = prompt('Enter category: achievements, awards, certificates, experiences').toLowerCase();
+    if(!['achievements','awards','certificates','experiences'].includes(type)) return alert('Invalid category');
+    let list = profile[type]||[];
+    let action = prompt(`Add / Delete / View ${type}? (A/D/V)`).toUpperCase();
+    if(action==='A'){ const item=prompt('Enter new item'); if(item){ list.push(item); profile[type]=list; saveProfile(profile); } }
+    else if(action==='D'){ const idx=parseInt(prompt(`Enter index to delete (0-${list.length-1})`)); if(!isNaN(idx)&&list[idx]){ list.splice(idx,1); profile[type]=list; saveProfile(profile); } }
+    else if(action==='V'){ alert(list.join('\n')||'None'); }
+  };
+
+  panel.querySelector('#btnSave').onclick=()=>{
+    profile.name=panel.querySelector('#inName').value.trim();
+    profile.education=panel.querySelector('#inEdu').value.trim();
+    profile.email=panel.querySelector('#inEmail').value.trim();
+    profile.linkedin=panel.querySelector('#inLinkedIn').value.trim();
+    profile.bio=panel.querySelector('#inBio').value.trim();
+    saveProfile(profile); alert('Saved locally.');
+  };
+
+  panel.querySelector('#btnChangePass').onclick=()=>{
+    const np=panel.querySelector('#inPass').value; if(!np) return alert('Enter new password');
+    setPassword(np); panel.querySelector('#inPass').value=''; alert('Password changed');
+  };
+
+  panel.querySelector('#btnLogout').onclick=()=>{ sessionStorage.removeItem('asfiya_logged_in'); isLoggedIn=false; renderApp(); };
+  panel.querySelector('#btnDelete').onclick=()=>{ if(confirm('Reset profile?')){ profile=JSON.parse(JSON.stringify(defaultProfile)); saveProfile(profile); renderApp(); } };
+  panel.querySelector('#btnExport').onclick=()=>{
+    const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(profile,null,2));
+    const a=document.createElement('a'); a.href=dataStr; a.download='asfiya_profile_backup.json'; document.body.appendChild(a); a.click(); a.remove();
+  };
+  panel.querySelector('#btnImport').onclick=()=>{ const f=panel.querySelector('#fileInput'); f.value=''; f.click(); };
+  panel.querySelector('#fileInput').onchange=(e)=>{
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{ const obj=JSON.parse(ev.target.result); if(confirm('Overwrite current profile?')){ profile=obj; saveProfile(profile); renderApp(); } }
+      catch(err){ alert('Invalid JSON'); }
+    }; reader.readAsText(file);
+  };
+  panel.querySelector('#btnPreview').onclick=()=>{ sessionStorage.removeItem('asfiya_logged_in'); isLoggedIn=false; renderApp(); };
+}
+
+function renderPreview(p){
+  preview.innerHTML = `<div style="display:flex;gap:12px;align-items:center">
+    <div class="avatar" style="width:72px;height:72px;border-radius:12px">AA</div>
+    <div>
+      <div style="font-size:20px;font-weight:700;color:#333">${escapeHtml(p.name)}</div>
+      <div class="small-muted" style="margin-top:6px">${escapeHtml(p.education)}</div>
+      <div style="margin-top:8px"><a class="link" href="mailto:${encodeURIComponent(p.email)}">${escapeHtml(p.email)}</a> · <a class="link" href="${escapeHtml(p.linkedin)}" target="_blank">LinkedIn</a></div>
+    </div>
+  </div>
+  <div style="margin-top:16px">
+    <div class="field-label">About</div>
+    <div class="small">${escapeHtml(p.bio)}</div>
+  </div>
+  <div style="margin-top:14px">
+    <div class="field-label">Projects</div>
+    ${p.projects.map(pr=>`<div style="margin-top:10px;padding:12px;border-radius:10px;background:#fbfdff;border:1px solid #eef6ff">
+      <div style="font-weight:700">${escapeHtml(pr.title)}</div>
+      <div class="small-muted" style="margin-top:6px">${escapeHtml(pr.desc)}</div>
+    </div>`).join('')}
+  </div>
+  ${['achievements','awards','certificates','experiences'].map(type=>{
+    if(!p[type]||p[type].length===0) return '';
+    return `<div style="margin-top:14px">
+      <div class="field-label">${type.charAt(0).toUpperCase()+type.slice(1)}</div>
+      ${p[type].map(it=>`<div style="margin-top:6px;padding:8px;background:#fbfdff;border-radius:8px;border:1px solid #eef6ff">${escapeHtml(it)}</div>`).join('')}
+    </div>`;
+  }).join('')}
+  <div style="margin-top:16px" class="flex-between">
+    <div class="small-muted">Profile saved in your browser (localStorage)</div>
+    <div><button id="openEdit" class="btn btn-sm ghost">Open Dashboard</button></div>
+  </div>`;
+  const btn=preview.querySelector('#openEdit'); if(btn) btn.onclick=()=>{ sessionStorage.removeItem('asfiya_logged_in'); isLoggedIn=false; renderApp(); setTimeout(()=>{ const pw=document.getElementById('pw'); if(pw) pw.focus(); },200); };
+}
+
+function escapeHtml(s){ if
